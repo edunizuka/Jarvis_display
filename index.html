@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jarvis Display</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #eef2f7;
+    --card: rgba(255,255,255,0.82);
+    --card-border: rgba(255,255,255,0.9);
+    --text-main: #1c2b3a;
+    --text-muted: #5f7080;
+    --text-hint: #9aaab8;
+    --accent: #4285f4;
+    --accent2: #34a853;
+    --shadow: 0 4px 24px rgba(60,80,120,0.10);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Nunito Sans', sans-serif;
+  }
+
+  body {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 10% 20%, rgba(66,133,244,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 80%, rgba(52,168,83,0.09) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 10%, rgba(251,188,5,0.08) 0%, transparent 45%),
+      #eef2f7;
+  }
+
+  /* ─── TOP BAR ─── */
+  .top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    padding: 32px 36px 0;
+    gap: 24px;
+  }
+
+  .clock-wrap {}
+  .time {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(72px, 12vw, 108px);
+    font-weight: 300;
+    color: var(--text-main);
+    letter-spacing: -3px;
+    line-height: 1;
+    user-select: none;
+  }
+  .time .sep {
+    animation: blink 1s step-end infinite;
+    opacity: 1;
+  }
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  .date-line {
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-weight: 400;
+  }
+  .meta-line {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--text-hint);
+  }
+  .meta-chip svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+  /* Weather card top-right */
+  .weather-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 130px;
+    backdrop-filter: blur(12px);
+  }
+  .w-icon { font-size: 40px; line-height: 1; }
+  .w-temp {
+    font-family: 'Nunito', sans-serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--text-main);
+    margin-top: 4px;
+  }
+  .w-desc { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.3; }
+  .w-city { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+
+  /* ─── MIDDLE ─── */
+  .middle {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr 1fr;
+    gap: 14px;
+    padding: 18px 36px;
+    align-items: stretch;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-hint);
+    margin-bottom: 12px;
+  }
+  .card-label svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+  /* News */
+  .news-list { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .news-item {
+    padding-left: 10px;
+    border-left: 2.5px solid var(--accent);
+    cursor: default;
+  }
+  .news-item:nth-child(2) { border-color: #34a853; }
+  .news-item:nth-child(3) { border-color: #fbbc05; }
+  .news-item:nth-child(4) { border-color: #ea4335; }
+  .news-title {
+    font-size: 13px;
+    color: var(--text-main);
+    line-height: 1.45;
+    font-weight: 400;
+  }
+  .news-src {
+    font-size: 10px;
+    color: var(--text-hint);
+    margin-top: 2px;
+  }
+
+  /* Forecast */
+  .forecast-list { display: flex; flex-direction: column; gap: 9px; flex: 1; justify-content: space-around; }
+  .fc-row {
+    display: grid;
+    grid-template-columns: 36px 24px 1fr;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-main);
+  }
+  .fc-day { color: var(--text-muted); font-size: 12px; }
+  .fc-icon { font-size: 18px; text-align: center; }
+  .fc-temps { display: flex; gap: 4px; }
+  .fc-max { font-weight: 600; color: var(--text-main); }
+  .fc-min { color: var(--text-hint); }
+
+  /* Quote */
+  .quote-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .quote-text {
+    font-size: 14px;
+    color: var(--text-main);
+    line-height: 1.6;
+    font-style: italic;
+    font-weight: 300;
+  }
+  .quote-author {
+    font-size: 11px;
+    color: var(--text-hint);
+    margin-top: 10px;
+  }
+
+  /* ─── BOTTOM ─── */
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 36px 24px;
+  }
+
+  .jarvis-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 40px;
+    padding: 9px 18px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+  }
+  .pulse-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.7); opacity: 0.45; }
+  }
+  .jarvis-text { font-size: 13px; color: var(--text-muted); }
+  .jarvis-text strong { color: var(--accent); font-weight: 600; }
+
+  .update-info { font-size: 11px; color: var(--text-hint); }
+
+  /* Loading state */
+  .skeleton {
+    height: 12px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.03) 50%, rgba(0,0,0,0.06) 75%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 6px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<!-- TOP -->
+<div class="top">
+  <div class="clock-wrap">
+    <div class="time" id="clock">00<span class="sep">:</span>00</div>
+    <div class="date-line" id="datestr">Cargando...</div>
+    <div class="meta-line">
+      <div class="meta-chip" id="chip-hum">
+        <svg viewBox="0 0 24 24"><path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0C19 10 12 2 12 2z"/></svg>
+        <span>— humedad</span>
+      </div>
+      <div class="meta-chip" id="chip-wind">
+        <svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h9a3 3 0 010 6H5M5 16h3"/></svg>
+        <span>— km/h viento</span>
+      </div>
+    </div>
+  </div>
+  <div class="weather-card">
+    <div class="w-icon" id="w-icon">⛅</div>
+    <div class="w-temp" id="w-temp">—°</div>
+    <div class="w-desc" id="w-desc">Cargando...</div>
+    <div class="w-city">Zaragoza</div>
+  </div>
+</div>
+
+<!-- MIDDLE -->
+<div class="middle">
+  <!-- News -->
+  <div class="card">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 11h10M7 15h6"/></svg>
+      Noticias
+    </div>
+    <div class="news-list" id="news-list">
+      <div class="news-item"><div class="skeleton" style="width:90%"></div><div class="skeleton" style="width:60%"></div></div>
+      <div class="news-item"><div class="skeleton" style="width:85%"></div><div class="skeleton" style="width:55%"></div></div>
+      <div class="news-item"><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:65%"></div></div>
+    </div>
+  </div>
+
+  <!-- Forecast -->
+  <div class="card">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24"><path d="M3 15a4 4 0 004 4h9a5 5 0 10-4.9-6H7a4 4 0 00-4 4v-2z"/></svg>
+      Próximos días
+    </div>
+    <div class="forecast-list" id="forecast-list">
+      <div class="fc-row"><span class="fc-day">Lun</span><span class="fc-icon">☀️</span><div class="fc-temps"><span class="fc-max">—°</span><span class="fc-min">—°</span></div></div>
+      <div class="fc-row"><span class="fc-day">Mar</span><span class="fc-icon">⛅</span><div class="fc-temps"><span class="fc-max">—°</span><span class="fc-min">—°</span></div></div>
+      <div class="fc-row"><span class="fc-day">Mié</span><span class="fc-icon">🌧️</span><div class="fc-temps"><span class="fc-max">—°</span><span class="fc-min">—°</span></div></div>
+      <div class="fc-row"><span class="fc-day">Jue</span><span class="fc-icon">☀️</span><div class="fc-temps"><span class="fc-max">—°</span><span class="fc-min">—°</span></div></div>
+      <div class="fc-row"><span class="fc-day">Vie</span><span class="fc-icon">⛅</span><div class="fc-temps"><span class="fc-max">—°</span><span class="fc-min">—°</span></div></div>
+    </div>
+  </div>
+
+  <!-- Quote -->
+  <div class="card">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+      Frase del día
+    </div>
+    <div class="quote-wrap">
+      <div class="quote-text" id="quote-text">"Cargando..."</div>
+      <div class="quote-author" id="quote-author"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM -->
+<div class="bottom">
+  <div class="jarvis-pill">
+    <div class="pulse-dot"></div>
+    <div class="jarvis-text">Escuchando — di <strong>"Jarvis"</strong></div>
+  </div>
+  <div class="update-info" id="update-info">—</div>
+</div>
+
+<script>
+// ── CLOCK ──
+const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function tick() {
+  const n = new Date();
+  const h = String(n.getHours()).padStart(2,'0');
+  const m = String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').innerHTML = h + '<span class="sep">:</span>' + m;
+  document.getElementById('datestr').textContent =
+    DIAS[n.getDay()] + ', ' + n.getDate() + ' de ' + MESES[n.getMonth()] + ' de ' + n.getFullYear();
+}
+tick();
+setInterval(tick, 1000);
+
+// ── QUOTES ──
+const quotes = [
+  {t:'"El único modo de hacer un gran trabajo es amar lo que haces."', a:'Steve Jobs'},
+  {t:'"La vida es lo que pasa mientras estás ocupado haciendo otros planes."', a:'John Lennon'},
+  {t:'"En medio de la dificultad reside la oportunidad."', a:'Albert Einstein'},
+  {t:'"El éxito es la suma de pequeños esfuerzos repetidos día tras día."', a:'Robert Collier'},
+  {t:'"No cuentes los días, haz que los días cuenten."', a:'Muhammad Ali'},
+  {t:'"La creatividad es la inteligencia divirtiéndose."', a:'Albert Einstein'},
+  {t:'"Cada día es una nueva oportunidad para cambiar tu vida."', a:'Anónimo'},
+  {t:'"Lo que no te mata te hace más fuerte."', a:'Friedrich Nietzsche'},
+  {t:'"Primero resuelve el problema, luego escribe el código."', a:'John Johnson'},
+  {t:'"La simplicidad es la máxima sofisticación."', a:'Leonardo da Vinci'},
+  {t:'"Aprende como si fueras a vivir para siempre."', a:'Mahatma Gandhi'},
+  {t:'"El conocimiento es poder."', a:'Francis Bacon'},
+  {t:'"La imaginación es más importante que el conocimiento."', a:'Albert Einstein'},
+  {t:'"Haz hoy lo que otros no harán para tener mañana lo que otros no tendrán."', a:'Jerry Rice'},
+  {t:'"El tiempo es el activo más valioso que no puedes recuperar."', a:'Ranveer Singh'},
+  {t:'"No es la especie más fuerte la que sobrevive, sino la más adaptable."', a:'Charles Darwin'},
+  {t:'"El que tiene un porqué para vivir puede soportar casi cualquier cómo."', a:'Friedrich Nietzsche'},
+  {t:'"La felicidad no es algo hecho. Proviene de tus propias acciones."', a:'Dalai Lama'},
+  {t:'"El secreto para salir adelante es empezar."', a:'Mark Twain'},
+  {t:'"Si puedes soñarlo, puedes lograrlo."', a:'Walt Disney'},
+  {t:'"La educación es el arma más poderosa que puedes usar para cambiar el mundo."', a:'Nelson Mandela'},
+  {t:'"No importa cuán despacio vayas, siempre que no te detengas."', a:'Confucio'},
+  {t:'"Todo lo que podemos imaginar es real."', a:'Pablo Picasso'},
+  {t:'"El único fracaso real es no haberlo intentado."', a:'Elbert Hubbard'},
+  {t:'"La perseverancia es el camino del éxito."', a:'Charlie Chaplin'},
+  {t:'"Actúa como si lo que haces marcara una diferencia. Lo hace."', a:'William James'},
+  {t:'"La vida no se mide por los momentos que respiras, sino por los que te quitan el aliento."', a:'George Carlin'},
+  {t:'"No hay límites para el bien que puedes hacer si no te importa quién se lleva el mérito."', a:'Ronald Reagan'},
+  {t:'"La mente lo es todo. En lo que piensas, te conviertes."', a:'Buda'},
+  {t:'"Donde hay voluntad hay un camino."', a:'Proverbio inglés'},
+  {t:'"Dos cosas son infinitas: el universo y la estupidez humana. Y del universo no estoy seguro."', a:'Albert Einstein'},
+];
+
+function setQuote() {
+  const idx = new Date().getDate() % quotes.length;
+  document.getElementById('quote-text').textContent = quotes[idx].t;
+  document.getElementById('quote-author').textContent = '— ' + quotes[idx].a;
+}
+setQuote();
+
+// ── WEATHER ──
+const W_ICONS = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+const W_DESC = {0:'Despejado',1:'Mayormente despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',48:'Niebla',51:'Llovizna ligera',53:'Llovizna',55:'Llovizna intensa',61:'Lluvia ligera',63:'Lluvia moderada',65:'Lluvia intensa',71:'Nieve ligera',73:'Nieve moderada',75:'Nieve intensa',80:'Chubascos',81:'Chubascos fuertes',82:'Chubascos violentos',95:'Tormenta',96:'Tormenta con granizo',99:'Tormenta fuerte'};
+const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+async function loadWeather() {
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=41.6488&longitude=-0.8891&current=temperature_2m,weathercode,relativehumidity_2m,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FMadrid&forecast_days=6');
+    const d = await r.json();
+    const cur = d.current;
+    document.getElementById('w-icon').textContent = W_ICONS[cur.weathercode] || '🌡️';
+    document.getElementById('w-temp').textContent = Math.round(cur.temperature_2m) + '°';
+    document.getElementById('w-desc').textContent = W_DESC[cur.weathercode] || 'Variable';
+    document.getElementById('chip-hum').querySelector('span').textContent = cur.relativehumidity_2m + '% humedad';
+    document.getElementById('chip-wind').querySelector('span').textContent = Math.round(cur.windspeed_10m) + ' km/h viento';
+
+    const daily = d.daily;
+    let fcHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      const dt = new Date(daily.time[i]);
+      const dayName = DAYS_SHORT[dt.getDay()];
+      const icon = W_ICONS[daily.weathercode[i]] || '🌡️';
+      const max = Math.round(daily.temperature_2m_max[i]);
+      const min = Math.round(daily.temperature_2m_min[i]);
+      fcHtml += `<div class="fc-row"><span class="fc-day">${dayName}</span><span class="fc-icon">${icon}</span><div class="fc-temps"><span class="fc-max">${max}°</span><span class="fc-min"> / ${min}°</span></div></div>`;
+    }
+    document.getElementById('forecast-list').innerHTML = fcHtml;
+  } catch(e) {
+    document.getElementById('w-desc').textContent = 'Sin conexión';
+  }
+}
+loadWeather();
+setInterval(loadWeather, 30 * 60 * 1000);
+
+// ── NEWS via RSS2JSON (gratuito) ──
+const FEEDS = [
+  { url: 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada', name: 'El País' },
+  { url: 'https://www.rtve.es/api/noticias.rss', name: 'RTVE' },
+  { url: 'https://www.20minutos.es/rss/', name: '20 Minutos' },
+  { url: 'https://www.elconfidencial.com/rss/portada.xml', name: 'El Confidencial' },
+];
+
+let currentFeed = 0;
+
+async function loadNews() {
+  const feed = FEEDS[currentFeed % FEEDS.length];
+  currentFeed++;
+  try {
+    const api = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed.url);
+    const r = await fetch(api);
+    const data = await r.json();
+    if (data.status === 'ok' && data.items && data.items.length > 0) {
+      const items = data.items.slice(0, 4);
+      const colors = ['#4285f4','#34a853','#fbbc05','#ea4335'];
+      document.getElementById('news-list').innerHTML = items.map((item, i) => {
+        const title = item.title.length > 80 ? item.title.substring(0, 80) + '…' : item.title;
+        return `<div class="news-item" style="border-color:${colors[i]}">
+          <div class="news-title">${title}</div>
+          <div class="news-src">${feed.name}</div>
+        </div>`;
+      }).join('');
+      const now = new Date();
+      document.getElementById('update-info').textContent =
+        'Actualizado a las ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    } else {
+      throw new Error('Feed vacío');
+    }
+  } catch(e) {
+    if (currentFeed < FEEDS.length * 2) {
+      setTimeout(loadNews, 3000);
+    } else {
+      document.getElementById('news-list').innerHTML =
+        '<div class="news-item"><div class="news-title">No se pudieron cargar noticias. Comprueba la conexión.</div></div>';
+    }
+  }
+}
+
+loadNews();
+setInterval(loadNews, 10 * 60 * 1000);
+</script>
+</body>
+</html>
